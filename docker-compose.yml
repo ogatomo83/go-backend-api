@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile/go.Dockerfile
+    volumes:
+      - ./go-backend-api:/app
+    working_dir: /app
+    ports:
+      - "8081:8081"
+    # restart: always
+    tty: true
+    env_file:
+      - .env.local
+    environment:
+      ENV: dev
+      PORT: 8081
+    command: sh ./scripts/go-backend-api.sh
+    networks:
+      - app-net
+  
+  mysql:
+    image: mysql:8.0.32
+    platform: linux/amd64
+    ports:
+      - "3307:3307"
+    # restart: always
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: twitter
+      TZ: Asia/Tokyo
+    volumes:
+      - ./mysql/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mysql/data:/var/lib/mysql
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
